@@ -68,7 +68,9 @@
 
             <!-- Reviews Section -->
             <section style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 2rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">⭐ Reviews ({{ reviews|length }})</h2>
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">
+                    ⭐ Reviews ({{ reviews|length }})
+                </h2>
                 
                 {% if reviews %}
                     <div style="margin-bottom: 2rem;">
@@ -76,10 +78,14 @@
                             <div style="padding: 1rem; background: var(--background); border-radius: var(--radius-md); margin-bottom: 1rem; border: 1px solid var(--border);">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                                     <strong style="color: var(--text-primary);">{{ review.reviewer_name or 'Anonymous' }}</strong>
-                                    <span style="color: var(--accent-color);">{{ '⭐' * review.rating }}</span>
+                                    <span style="color: var(--accent-color);">
+                                        {{ '⭐' * review.rating }}
+                                    </span>
                                 </div>
                                 <p style="margin: 0; color: var(--text-secondary);">{{ review.comment or 'Great recipe!' }}</p>
-                                <small style="color: var(--text-light);">{{ review.created_at[:10] if review.created_at else 'Recently' }}</small>
+                                <small style="color: var(--text-light);">
+                                    {{ review.created_at[:10] if review.created_at else 'Recently' }}
+                                </small>
                             </div>
                         {% endfor %}
                     </div>
@@ -89,9 +95,11 @@
 
                 <!-- Add Review Form -->
                 <div>
-                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">Add Your Review</h3>
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">
+                        Add Your Review
+                    </h3>
                     <form method="POST" action="{{ url_for('add_review', recipe_id=recipe.recipe_id) }}">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                             <div class="form-group">
                                 <label class="form-label" for="rating">Rating</label>
                                 <select name="rating" id="rating" class="form-select" required>
@@ -103,18 +111,16 @@
                                     <option value="1">⭐ Poor</option>
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <label class="form-label" for="user_id">Your Name</label>
-                                <select name="user_id" id="user_id" class="form-select">
-                                    <option value="">Anonymous</option>
-                                    {% for u in users %}
-                                        <option value="{{ u.user_id }}">{{ u.name }}</option>
+                                <label class="form-label" for="user_id">Reviewer</label>
+                                <select name="user_id" id="user_id" class="form-select" required>
+                                    <option value="">Select user</option>
+                                    {% for user in users %}
+                                        <option value="{{ user.user_id }}">{{ user.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label" for="comment">Your Review</label>
                             <textarea name="comment" id="comment" rows="4" class="form-textarea" placeholder="Share your thoughts about this recipe..."></textarea>

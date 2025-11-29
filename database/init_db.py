@@ -210,7 +210,7 @@ def init_database():
         sample_recipes
     )
     
-    # Add image URLs for each recipe
+    # Add main image for each recipe
     recipe_images = [
         (1, 'https://ooni.com/cdn/shop/articles/20220211142347-margherita-9920_ba86be55-674e-4f35-8094-2067ab41a671.jpg?v=1737104576&width=400', 'Margherita Pizza'),
         (2, 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop&auto=format', 'Caesar Salad'),
@@ -224,34 +224,34 @@ def init_database():
     ]
     cursor.executemany("INSERT INTO images (recipe_id, file_path, alt_text) VALUES (?, ?, ?)", recipe_images)
     
-    # Insert sample recipe-ingredient relationships
+    # Insert sample recipe-ingredient relationships (demo data)
     recipe_ingredients_data = [
-        # Recipe 1
+        # For recipe 1
         (1, 1, '2 breasts'),
         (1, 2, '2 cups'),
         (1, 3, '1 cup'),
         (1, 4, '2 tbsp'),
         (1, 5, '3 cloves'),
         (1, 6, '3 tbsp'),
-        # Recipe 2
+        # For recipe 2
         (2, 2, '1 cup'),
         (2, 3, '1 cup'),
         (2, 8, '2 peppers'),
         (2, 15, '1 avocado'),
         (2, 4, '2 tbsp'),
-        # Recipe 3
+        # For recipe 3
         (3, 7, '1 block'),
         (3, 18, '8 tortillas'),
         (3, 20, '2 cups'),
         (3, 10, '2 tomatoes'),
         (3, 17, '1/4 cup'),
-        # Recipe 4
+        # For recipe 4
         (4, 11, '1 lb'),
         (4, 3, '1 cup'),
         (4, 10, '2 tomatoes'),
         (4, 13, '2 cups'),
         (4, 12, '1/2 cup'),
-        # Recipe 5
+        # For recipe 5
         (5, 19, '1 lb'),
         (5, 2, '2 cups'),
         (5, 14, '1 can'),
@@ -259,30 +259,30 @@ def init_database():
         (5, 15, '1 avocado')
     ]
     cursor.executemany(
-        "INSERT OR REPLACE INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)",
+        "INSERT OR IGNORE INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)",
         recipe_ingredients_data
     )
     
-    # Insert sample recipe tags (for 9 recipes)
+    # Insert sample recipe tags
     recipe_tags_data = [
         # Margherita Pizza (1)
-        (1, 1), (1, 15),  # vegetarian, italian
+        (1, 15),  # italian
         # Caesar Salad (2)
         (2, 1), (2, 10),  # vegetarian, low-carb
         # Grilled Chicken Sandwich (3)
-        (3, 9),  # protein-rich
+        (3, 9),           # protein-rich
         # Vegetarian Bowl (4)
         (4, 1), (4, 8), (4, 3),  # vegetarian, healthy, gluten-free
         # Sweet Potato Fries (5)
-        (5, 1), (5, 8),  # vegetarian, healthy
+        (5, 1), (5, 8),   # vegetarian, healthy
         # Grilled Fish Tacos (6)
         (6, 14), (6, 9),  # mexican, protein-rich
         # Chicken Protein Bowl (7)
-        (7, 9), (7, 8),  # protein-rich, healthy
+        (7, 9), (7, 8),   # protein-rich, healthy
         # Crispy Fries (8)
-        (8, 1),  # vegetarian
+        (8, 1),           # vegetarian
         # Veggie Pizza (9)
-        (9, 1), (9, 15)  # vegetarian, italian
+        (9, 1), (9, 15)   # vegetarian, italian
     ]
     cursor.executemany(
         "INSERT OR IGNORE INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)",
@@ -302,25 +302,8 @@ def init_database():
         sample_reviews
     )
     
-    # Additional sample images (currently not used)
-    sample_images = [
-        (1, 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop', 'Delicious avocado toast with cherry tomatoes'),
-        (2, 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop', 'Colorful vegetable fried rice'),
-        (3, 'https://images.unsplash.com/photo-1603064752734-4c48eff53d05?w=400&h=300&fit=crop', 'Traditional chicken fried rice'),
-        (4, 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop', 'Nutritious vegetarian Buddha bowl'),
-        (5, 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop', 'Spicy tofu tacos with fresh toppings'),
-        (6, 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop', 'Classic Margherita pizza'),
-        (7, 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop', 'Loaded meat lovers pizza'),
-        (8, 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop', 'Teriyaki chicken rice bowl'),
-        (9, 'https://images.unsplash.com/photo-1559314809-0f31657def5e?w=400&h=300&fit=crop', 'Traditional pad thai noodles'),
-        (10, 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=400&h=300&fit=crop', 'Rich vegetarian ramen bowl'),
-        (11, 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop', 'Fresh Caesar salad with croutons'),
-        (12, 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=300&fit=crop', 'Mediterranean Greek salad'),
-        (13, 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop', 'Nutritious kale superfood salad'),
-        (14, 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=400&h=300&fit=crop', 'Crispy sweet potato fries'),
-        (15, 'https://images.unsplash.com/photo-1576402794548-c805923dd4e1?w=400&h=300&fit=crop', 'Spicy buffalo cauliflower')
-    ]
-    # Left commented to avoid duplicate images, keep for future use
+    # (Optional) extra sample images are commented out to avoid multiple images per recipe
+    # sample_images = [...]
     # cursor.executemany(
     #     "INSERT OR IGNORE INTO images (recipe_id, file_path, alt_text) VALUES (?, ?, ?)",
     #     sample_images

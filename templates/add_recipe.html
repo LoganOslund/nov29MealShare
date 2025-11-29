@@ -10,8 +10,9 @@
             <p class="section-subtitle">Help build our community cookbook with your amazing creations</p>
         </div>
 
-        <div style="max-width: 600px; margin: 0 auto;">
+        <div style="max-width: 800px; margin: 0 auto;">
             <form method="POST" action="{{ url_for('add_recipe') }}" style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border);">
+                <!-- Basic info -->
                 <div class="form-group">
                     <label class="form-label" for="name">Recipe Name *</label>
                     <input type="text" name="name" id="name" class="form-input" required placeholder="e.g., Chicken Stir Fry">
@@ -23,7 +24,7 @@
                               placeholder="Describe how to prepare this recipe step by step..."></textarea>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label" for="prep_time">Prep Time (minutes)</label>
                         <input type="number" name="prep_time" id="prep_time" class="form-input" placeholder="30">
@@ -33,42 +34,59 @@
                         <label class="form-label" for="cost_estimate">Cost Estimate ($)</label>
                         <input type="number" step="0.01" name="cost_estimate" id="cost_estimate" class="form-input" placeholder="12.99">
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="author_id">Author *</label>
+                        <select name="author_id" id="author_id" class="form-select" required>
+                            <option value="">Select your profile</option>
+                            {% for user in users %}
+                                <option value="{{ user.user_id }}">{{ user.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Image info -->
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label" for="image_url">Main Image URL</label>
+                    <input type="url" name="image_url" id="image_url" class="form-input" placeholder="https://images.unsplash.com/...">
+                    <small style="color: var(--text-light); font-size: 0.8rem;">
+                        Paste a full image URL (e.g., from Unsplash). If omitted, a placeholder image will be used.
+                    </small>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="author_id">Author *</label>
-                    <select name="author_id" id="author_id" class="form-select" required>
-                        <option value="">Select your profile</option>
-                        {% for user in users %}
-                            <option value="{{ user.user_id }}">{{ user.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <label class="form-label" for="image_alt">Image Description (alt text)</label>
+                    <input type="text" name="image_alt" id="image_alt" class="form-input" placeholder="Short description for accessibility">
                 </div>
 
-                <!-- Ingredients input -->
-                <div class="form-group">
-                    <label class="form-label" for="ingredients">Ingredients</label>
-                    <textarea name="ingredients" id="ingredients" rows="5" class="form-textarea"
-                              placeholder="One per line, e.g.&#10;Chicken Breast: 2 breasts&#10;Rice: 2 cups"></textarea>
-                    <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">
-                        Format: <code>Ingredient Name: quantity</code> — one ingredient per line.
-                    </p>
-                </div>
-
-                <!-- Dietary tags -->
-                <div class="form-group">
+                <!-- Tags -->
+                <div class="form-group" style="margin-top: 1.5rem;">
                     <label class="form-label">Dietary Tags</label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        {% for tag in tags %}
-                            <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.875rem;">
-                                <input type="checkbox" name="tags" value="{{ tag.tag_id }}">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem 1rem;">
+                        {% for tag in dietary_tags %}
+                            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--text-secondary);">
+                                <input type="checkbox" name="tags" value="{{ tag.tag_id }}" style="accent-color: var(--primary-color);">
                                 <span>{{ tag.tag_name }}</span>
                             </label>
                         {% endfor %}
                     </div>
-                    <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">
-                        Choose all that apply (e.g., vegetarian, gluten-free, spicy).
-                    </p>
+                    <small style="color: var(--text-light); font-size: 0.8rem;">
+                        Choose all that apply (e.g., vegetarian, healthy, gluten-free).
+                    </small>
+                </div>
+
+                <!-- Ingredients -->
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label" for="ingredients_text">Ingredients</label>
+                    <textarea name="ingredients_text" id="ingredients_text" rows="6" class="form-textarea"
+                              placeholder="One ingredient per line, e.g.:
+Chicken Breast - 2 breasts
+Broccoli - 1 cup
+Garlic - 3 cloves"></textarea>
+                    <small style="color: var(--text-light); font-size: 0.8rem;">
+                        Each line should be "ingredient name - quantity". The app will automatically create or reuse ingredients and link them to this recipe.
+                    </small>
                 </div>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
