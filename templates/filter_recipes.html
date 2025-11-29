@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Filter Recipes - Meal Sharing{% endblock %}
+
+{% block content %}
+<section class="recipes-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Our Full Menu</h1>
+            <p class="section-subtitle">Discover amazing recipes from our talented community</p>
+        </div>
+
+        <div class="filter-form" style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 3rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+            <form method="GET" action="{{ url_for('recipes') }}">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: end;">
+                    <div class="form-group">
+                        <label class="form-label" for="tag">Dietary Preferences</label>
+                        <select name="tag" id="tag" class="form-select">
+                            <option value="">All Options</option>
+                            {% for tag in all_tags %}
+                                <option value="{{ tag.tag_name }}" {% if current_tag == tag.tag_name %}selected{% endif %}>
+                                    {{ tag.tag_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="max_prep_time">Max Prep Time (min)</label>
+                        <input type="number" name="max_prep_time" id="max_prep_time" class="form-input"
+                               value="{{ current_max_prep_time or '' }}" placeholder="e.g. 30">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="ingredient">Search Ingredients</label>
+                        <input type="text" name="ingredient" id="ingredient" class="form-input"
+                               value="{{ current_ingredient or '' }}" placeholder="chicken, avocado...">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <a href="{{ url_for('recipes') }}" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-header" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary);">Available Dishes <span style="color: var(--text-secondary); font-weight: 400;">({{ recipes|length }} items)</span></h2>
+        </div>
+        
+        {% if recipes %}
+            <div class="recipes-grid">
+                {% for recipe in recipes %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            <img src="{{ recipe.image_url or 'https://via.placeholder.com/400x300/f7fafc/4a5568?text=' + recipe.name|urlencode }}" 
+                                 alt="{{ recipe.image_alt or recipe.name }}" loading="lazy">
+                            <div class="recipe-price">${{ '%.2f'|format(recipe.cost_estimate) if recipe.cost_estimate else '12.99' }}</div>
+                        </div>
+                        <div class="recipe-content">
+                            <div class="recipe-header">
+                                <h3><a href="{{ url_for('recipe_detail', recipe_id=recipe.recipe_id) }}">{{ recipe.name }}</a></h3>
+                                <div class="recipe-meta">
+                                    <span class="author">by {{ recipe.author_name or 'Campus Chef' }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="recipe-info">
+                                <span class="prep-time">⏱ {{ recipe.prep_time_minutes or '25' }} min</span>
+                                <span class="rating">{{ '%.1f'|format(recipe.avg_rating) if recipe.avg_rating else '4.5' }} ({{ recipe.review_count or '12' }})</span>
+                            </div>
+                            
+                            {% if recipe.tags %}
+                                <div class="recipe-tags">
+                                    {% for tag in recipe.tags.split(',')[:3] %}
+                                        <span class="tag">{{ tag.strip() }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('recipe_detail', recipe_id=recipe.recipe_id) }}" class="btn btn-primary btn-small">View Recipe</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-results">No recipes match your filters. <a href="{{ url_for('add_recipe') }}" class="btn btn-primary">Share a recipe!</a></p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

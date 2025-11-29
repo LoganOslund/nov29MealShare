@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.name }} - Campus Kitchen{% endblock %}
+
+{% block content %}
+<section class="recipes-section">
+    <div class="container">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <!-- Recipe Header -->
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h1 class="section-title">{{ recipe.name }}</h1>
+                <p class="section-subtitle">Created by {{ recipe.author_name or 'Campus Chef' }} on {{ recipe.created_at[:10] if recipe.created_at else 'Recently' }}</p>
+                
+                <!-- Recipe Stats -->
+                <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">⏱ {{ recipe.prep_time_minutes or '25' }}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">Minutes</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${{ '%.2f'|format(recipe.cost_estimate) if recipe.cost_estimate else '12.99' }}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">Price</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">4.5★</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">Rating</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipe Image -->
+            {% if images %}
+                <div style="margin-bottom: 3rem; text-align: center;">
+                    <img src="{{ images[0].file_path }}" alt="{{ images[0].alt_text or recipe.name }}" 
+                         style="max-width: 100%; height: 300px; object-fit: cover; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg);">
+                </div>
+            {% endif %}
+
+            <!-- Ingredients Section -->
+            <section style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 2rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">🥘 Ingredients</h2>
+                {% if ingredients %}
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        {% for ingredient in ingredients %}
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+                                <span>{{ ingredient.name }}</span>
+                                <span style="font-weight: 600; color: var(--primary-color);">{{ ingredient.quantity }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="color: var(--text-secondary); margin: 0;">Ingredients will be provided when you order this dish.</p>
+                {% endif %}
+            </section>
+
+            <!-- Instructions Section -->
+            <section style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 2rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">📝 Instructions</h2>
+                <div style="line-height: 1.7; color: var(--text-primary);">{{ recipe.instructions }}</div>
+            </section>
+
+            <!-- Reviews Section -->
+            <section style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 2rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">⭐ Reviews ({{ reviews|length }})</h2>
+                
+                {% if reviews %}
+                    <div style="margin-bottom: 2rem;">
+                        {% for review in reviews %}
+                            <div style="padding: 1rem; background: var(--background); border-radius: var(--radius-md); margin-bottom: 1rem; border: 1px solid var(--border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <strong style="color: var(--text-primary);">{{ review.reviewer_name or 'Anonymous' }}</strong>
+                                    <span style="color: var(--accent-color);">{{ '⭐' * review.rating }}</span>
+                                </div>
+                                <p style="margin: 0; color: var(--text-secondary);">{{ review.comment or 'Great recipe!' }}</p>
+                                <small style="color: var(--text-light);">{{ review.created_at[:10] if review.created_at else 'Recently' }}</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">No reviews yet. Be the first to review this recipe!</p>
+                {% endif %}
+
+                <!-- Add Review Form -->
+                <div>
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">Add Your Review</h3>
+                    <form method="POST" action="{{ url_for('add_review', recipe_id=recipe.recipe_id) }}">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="user_id">Reviewer</label>
+                                <select name="user_id" id="user_id" class="form-select" required>
+                                    <option value="">Select your name</option>
+                                    {% for user in users %}
+                                        <option value="{{ user.user_id }}">{{ user.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="rating">Rating</label>
+                                <select name="rating" id="rating" class="form-select" required>
+                                    <option value="">Select rating</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                    <option value="4">⭐⭐⭐⭐ Very Good</option>
+                                    <option value="3">⭐⭐⭐ Good</option>
+                                    <option value="2">⭐⭐ Fair</option>
+                                    <option value="1">⭐ Poor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="comment">Your Review</label>
+                            <textarea name="comment" id="comment" rows="4" class="form-textarea" placeholder="Share your thoughts about this recipe..."></textarea>
+                        </div>
+
+                     <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                </div>
+
+            </section>
+
+            <!-- Action Buttons -->
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Menu</a>
+                <a href="{{ url_for('recipes') }}" class="btn btn-primary" style="margin-left: 1rem;">Browse All Recipes</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

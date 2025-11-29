@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Meal Sharing{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-content">
+        <h1>Campus Kitchen</h1>
+        <p>Fresh, delicious, and student-friendly dining crafted with care. Discover amazing recipes shared by our community.</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('recipes') }}" class="btn btn-primary">Explore Menu</a>
+            <a href="{{ url_for('add_recipe') }}" class="btn btn-secondary">Share Recipe</a>
+        </div>
+    </div>
+</section>
+
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number">{{ recipes|length }}</span>
+                <span class="stat-label">Fresh Recipes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Happy Students</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">4.9★</span>
+                <span class="stat-label">Average Rating</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">Daily</span>
+                <span class="stat-label">Fresh Updates</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="recipes-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Today's Featured Menu</h2>
+            <p class="section-subtitle">Handpicked recipes from our talented community of student chefs</p>
+        </div>
+    
+        {% if recipes %}
+            <div class="recipes-grid">
+                {% for recipe in recipes %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            <img src="{{ recipe.image_url or 'https://via.placeholder.com/400x300/f7fafc/4a5568?text=' + recipe.name|urlencode }}" 
+                                 alt="{{ recipe.image_alt or recipe.name }}" loading="lazy">
+                            <div class="recipe-price">${{ '%.2f'|format(recipe.cost_estimate) if recipe.cost_estimate else '12.99' }}</div>
+                        </div>
+                        <div class="recipe-content">
+                            <div class="recipe-header">
+                                <h3><a href="{{ url_for('recipe_detail', recipe_id=recipe.recipe_id) }}">{{ recipe.name }}</a></h3>
+                                <div class="recipe-meta">
+                                    <span class="author">by {{ recipe.author_name or 'Campus Chef' }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="recipe-info">
+                                <span class="prep-time">⏱ {{ recipe.prep_time_minutes or '25' }} min</span>
+                                <span class="rating">{{ '%.1f'|format(recipe.avg_rating) if recipe.avg_rating else '4.5' }} ({{ recipe.review_count or '12' }})</span>
+                            </div>
+                            
+                            {% if recipe.tags %}
+                                <div class="recipe-tags">
+                                    {% for tag in recipe.tags.split(',')[:3] %}
+                                        <span class="tag">{{ tag.strip() }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('recipe_detail', recipe_id=recipe.recipe_id) }}" class="btn btn-primary btn-small">View Recipe</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-results">No recipes available yet. <a href="{{ url_for('add_recipe') }}" class="btn btn-primary">Share the first recipe!</a></p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

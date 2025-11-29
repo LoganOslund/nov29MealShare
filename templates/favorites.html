@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.name }}'s Favorites - Meal Sharing{% endblock %}
+
+{% block content %}
+<div class="favorites-page">
+    <h1>{{ user.name }}'s Favorite Recipes</h1>
+
+    {% if favorites %}
+        <div class="recipe-grid">
+            {% for recipe in favorites %}
+                <div class="recipe-card">
+                    <div class="recipe-header">
+                        <h3><a href="{{ url_for('recipe_detail', recipe_id=recipe.recipe_id) }}">{{ recipe.name }}</a></h3>
+                        <span class="saved-date">Saved: {{ recipe.date_saved[:10] }}</span>
+                    </div>
+                    
+                    <div class="recipe-info">
+                        <span class="prep-time">⏱️ {{ recipe.prep_time_minutes or 'N/A' }} min</span>
+                        <span class="cost">{{ '%.2f'|format(recipe.cost_estimate) if recipe.cost_estimate else 'Market Price' }}</span>
+                        <span class="rating">⭐ {{ '%.1f'|format(recipe.avg_rating) }}</span>
+                    </div>
+                    
+                    {% if recipe.tags %}
+                        <div class="recipe-tags">
+                            {% for tag in recipe.tags.split(',') %}
+                                <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('recipe_detail', recipe_id=recipe.recipe_id) }}" class="btn btn-small">View Recipe</a>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if mongo_favorites %}
+            <div class="mongo-favorites">
+                <h2>MongoDB Favorites</h2>
+                <ul>
+                    {% for fav in mongo_favorites %}
+                        <li>Recipe ID: {{ fav.recipe_id }} - {{ fav.notes or 'No notes' }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="no-results">No favorites yet. <a href="{{ url_for('recipes') }}">Browse recipes</a> to add some!</p>
+    {% endif %}
+
+    <div class="page-actions">
+        <a href="{{ url_for('list_users') }}" class="btn btn-secondary">Back to Users</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Browse Recipes</a>
+    </div>
+</div>
+{% endblock %}

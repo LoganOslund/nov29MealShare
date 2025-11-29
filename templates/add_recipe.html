@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Add Recipe - Meal Sharing{% endblock %}
+
+{% block content %}
+<section class="recipes-section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Share Your Recipe</h1>
+            <p class="section-subtitle">Help build our community cookbook with your amazing creations</p>
+        </div>
+
+        <div style="max-width: 600px; margin: 0 auto;">
+            <form method="POST" action="{{ url_for('add_recipe') }}" style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border);">
+                <div class="form-group">
+                    <label class="form-label" for="name">Recipe Name *</label>
+                    <input type="text" name="name" id="name" class="form-input" required placeholder="e.g., Chicken Stir Fry">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="instructions">Instructions *</label>
+                    <textarea name="instructions" id="instructions" rows="8" class="form-textarea" required 
+                              placeholder="Describe how to prepare this recipe step by step..."></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="prep_time">Prep Time (minutes)</label>
+                        <input type="number" name="prep_time" id="prep_time" class="form-input" placeholder="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="cost_estimate">Cost Estimate ($)</label>
+                        <input type="number" step="0.01" name="cost_estimate" id="cost_estimate" class="form-input" placeholder="12.99">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="author_id">Author *</label>
+                    <select name="author_id" id="author_id" class="form-select" required>
+                        <option value="">Select your profile</option>
+                        {% for user in users %}
+                            <option value="{{ user.user_id }}">{{ user.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Share Recipe</button>
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+
+                <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 1rem; text-align: center;">* Required fields</p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
