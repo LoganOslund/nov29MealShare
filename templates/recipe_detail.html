@@ -9,16 +9,23 @@
             <!-- Recipe Header -->
             <div style="text-align: center; margin-bottom: 3rem;">
                 <h1 class="section-title">{{ recipe.name }}</h1>
-                <p class="section-subtitle">Created by {{ recipe.author_name or 'Campus Chef' }} on {{ recipe.created_at[:10] if recipe.created_at else 'Recently' }}</p>
+                <p class="section-subtitle">
+                    Created by {{ recipe.author_name or 'Campus Chef' }} 
+                    on {{ recipe.created_at[:10] if recipe.created_at else 'Recently' }}
+                </p>
                 
                 <!-- Recipe Stats -->
                 <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
                     <div style="text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">⏱ {{ recipe.prep_time_minutes or '25' }}</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">
+                            ⏱ {{ recipe.prep_time_minutes or '25' }}
+                        </div>
                         <div style="font-size: 0.875rem; color: var(--text-secondary);">Minutes</div>
                     </div>
                     <div style="text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${{ '%.2f'|format(recipe.cost_estimate) if recipe.cost_estimate else '12.99' }}</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">
+                            ${{ '%.2f'|format(recipe.cost_estimate) if recipe.cost_estimate else '12.99' }}
+                        </div>
                         <div style="font-size: 0.875rem; color: var(--text-secondary);">Price</div>
                     </div>
                     <div style="text-align: center;">
@@ -86,16 +93,6 @@
                     <form method="POST" action="{{ url_for('add_review', recipe_id=recipe.recipe_id) }}">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                             <div class="form-group">
-                                <label class="form-label" for="user_id">Reviewer</label>
-                                <select name="user_id" id="user_id" class="form-select" required>
-                                    <option value="">Select your name</option>
-                                    {% for user in users %}
-                                        <option value="{{ user.user_id }}">{{ user.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="form-group">
                                 <label class="form-label" for="rating">Rating</label>
                                 <select name="rating" id="rating" class="form-select" required>
                                     <option value="">Select rating</option>
@@ -106,17 +103,25 @@
                                     <option value="1">⭐ Poor</option>
                                 </select>
                             </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="user_id">Your Name</label>
+                                <select name="user_id" id="user_id" class="form-select">
+                                    <option value="">Anonymous</option>
+                                    {% for u in users %}
+                                        <option value="{{ u.user_id }}">{{ u.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="comment">Your Review</label>
                             <textarea name="comment" id="comment" rows="4" class="form-textarea" placeholder="Share your thoughts about this recipe..."></textarea>
                         </div>
-
-                     <button type="submit" class="btn btn-primary">Submit Review</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
                     </form>
                 </div>
-
             </section>
 
             <!-- Action Buttons -->

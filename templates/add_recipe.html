@@ -11,25 +11,18 @@
         </div>
 
         <div style="max-width: 600px; margin: 0 auto;">
-            <form method="POST" action="{{ url_for('add_recipe') }}"
-                  style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); 
-                         box-shadow: var(--shadow-md); border: 1px solid var(--border);">
-
-                <!-- Recipe Name -->
+            <form method="POST" action="{{ url_for('add_recipe') }}" style="background: var(--surface); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border);">
                 <div class="form-group">
                     <label class="form-label" for="name">Recipe Name *</label>
-                    <input type="text" name="name" id="name" class="form-input" required 
-                           placeholder="e.g., Chicken Stir Fry">
+                    <input type="text" name="name" id="name" class="form-input" required placeholder="e.g., Chicken Stir Fry">
                 </div>
 
-                <!-- Instructions -->
                 <div class="form-group">
                     <label class="form-label" for="instructions">Instructions *</label>
-                    <textarea name="instructions" id="instructions" rows="8" class="form-textarea" required
+                    <textarea name="instructions" id="instructions" rows="8" class="form-textarea" required 
                               placeholder="Describe how to prepare this recipe step by step..."></textarea>
                 </div>
 
-                <!-- Prep Time + Cost -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label class="form-label" for="prep_time">Prep Time (minutes)</label>
@@ -38,12 +31,10 @@
 
                     <div class="form-group">
                         <label class="form-label" for="cost_estimate">Cost Estimate ($)</label>
-                        <input type="number" step="0.01" name="cost_estimate" id="cost_estimate" 
-                               class="form-input" placeholder="12.99">
+                        <input type="number" step="0.01" name="cost_estimate" id="cost_estimate" class="form-input" placeholder="12.99">
                     </div>
                 </div>
 
-                <!-- Author -->
                 <div class="form-group">
                     <label class="form-label" for="author_id">Author *</label>
                     <select name="author_id" id="author_id" class="form-select" required>
@@ -54,30 +45,38 @@
                     </select>
                 </div>
 
-                <!-- TAG SELECTION SECTION -->
+                <!-- Ingredients input -->
+                <div class="form-group">
+                    <label class="form-label" for="ingredients">Ingredients</label>
+                    <textarea name="ingredients" id="ingredients" rows="5" class="form-textarea"
+                              placeholder="One per line, e.g.&#10;Chicken Breast: 2 breasts&#10;Rice: 2 cups"></textarea>
+                    <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">
+                        Format: <code>Ingredient Name: quantity</code> — one ingredient per line.
+                    </p>
+                </div>
+
+                <!-- Dietary tags -->
                 <div class="form-group">
                     <label class="form-label">Dietary Tags</label>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        {% for tag in all_tags %}
-                            <label style="display:flex; align-items:center; gap:0.4rem; 
-                                          background: var(--background); padding: 0.4rem 0.75rem;
-                                          border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        {% for tag in tags %}
+                            <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.875rem;">
                                 <input type="checkbox" name="tags" value="{{ tag.tag_id }}">
-                                {{ tag.tag_name }}
+                                <span>{{ tag.tag_name }}</span>
                             </label>
                         {% endfor %}
                     </div>
+                    <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">
+                        Choose all that apply (e.g., vegetarian, gluten-free, spicy).
+                    </p>
                 </div>
 
-                <!-- Submit -->
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Share Recipe</button>
                     <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
                 </div>
 
-                <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 1rem; text-align: center;">
-                    * Required fields
-                </p>
+                <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 1rem; text-align: center;">* Required fields</p>
             </form>
         </div>
     </div>

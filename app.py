@@ -83,12 +83,8 @@ def recipe_detail(recipe_id):
         WHERE ri.recipe_id = ?
     ''', (recipe_id,)).fetchall()
 
-    # Get users for the "Reviewer" dropdown
-    users = conn.execute('''
-        SELECT user_id, name
-        FROM users
-        ORDER BY name
-    ''').fetchall()
+    # Get users for review dropdown
+    users = conn.execute('SELECT user_id, name FROM users ORDER BY name').fetchall()
     
     conn.close()
     
@@ -100,7 +96,6 @@ def recipe_detail(recipe_id):
         ingredients=ingredients,
         users=users
     )
-
 
 @app.route('/recipes')
 def recipes():
@@ -193,74 +188,112 @@ def recipes():
 @app.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
     """Add new recipe"""
-
-    conn = get_db_connection()
-
     if request.method == 'POST':
         name = request.form['name']
         instructions = request.form['instructions']
         prep_time = request.form.get('prep_time', type=int)
         cost_estimate = request.form.get('cost_estimate', type=float)
         author_id = request.form.get('author_id', type=int) or 1
-
-        # Get selected tag IDs (checkboxes)
-        tag_ids = request.form.getlist('tags')
-
+        raw_ingredients = request.form.get('ingredients', '').strip()
+        selected_tags = request.form.getlist('tags')  # list of tag_id strings
+        
         if not name or not instructions:
             flash('Name and instructions are required', 'error')
+            conn = get_db_connection()
             users = conn.execute('SELECT user_id, name FROM users ORDER BY name').fetchall()
-            all_tags = conn.execute('SELECT tag_id, tag_name FROM dietary_tags ORDER BY tag_name').fetchall()
+            tags = conn.execute('SELECT tag_id, tag_name FROM dietary_tags ORDER BY tag_name').fetchall()
             conn.close()
-            return render_template('add_recipe.html', users=users, all_tags=all_tags)
-
+            return render_template('add_recipe.html', users=users, tags=tags)
+        
+        conn = get_db_connection()
         cursor = conn.cursor()
-
+        
         # Insert recipe
         cursor.execute('''
             INSERT INTO recipes (name, instructions, prep_time_minutes, cost_estimate, author_id)
             VALUES (?, ?, ?, ?, ?)
         ''', (name, instructions, prep_time, cost_estimate, author_id))
-
+        
         recipe_id = cursor.lastrowid
 
-        # Insert tags
-        for tag_id in tag_ids:
-            cursor.execute(
-                'INSERT INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)',
-                (recipe_id, tag_id)
-            )
+        # Insert dietary tags for this recipe
+        for tag_id_str in selected_tags:
+            try:
+                tag_id = int(tag_id_str)
+                cursor.execute(
+                    'INSERT OR IGNORE INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)',
+                    (recipe_id, tag_id)
+                )
+            except ValueError:
+                continue  # ignore bad input
 
+        # Parse and insert ingredients
+        if raw_ingredients:
+            for line in raw_ingredients.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                if ':' in line:
+                    name_part, quantity = line.split(':', 1)
+                    name_part = name_part.strip()
+                    quantity = quantity.strip()
+                else:
+                    name_part = line
+                    quantity = ''
+                if not name_part:
+                    continue
+
+                # Find or create ingredient
+                ing_row = cursor.execute(
+                    'SELECT ingredient_id FROM ingredients WHERE name = ?',
+                    (name_part,)
+                ).fetchone()
+                if ing_row:
+                    ingredient_id = ing_row['ingredient_id']
+                else:
+                    cursor.execute(
+                        'INSERT INTO ingredients (name) VALUES (?)',
+                        (name_part,)
+                    )
+                    ingredient_id = cursor.lastrowid
+
+                # Link ingredient to recipe
+                cursor.execute(
+                    '''
+                    INSERT OR REPLACE INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+                    VALUES (?, ?, ?)
+                    ''',
+                    (recipe_id, ingredient_id, quantity)
+                )
+        
         conn.commit()
         conn.close()
-
+        
         flash('Recipe added successfully!', 'success')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
-
-    # GET request — Show form
+    
+    # GET request - show form with users + tags
+    conn = get_db_connection()
     users = conn.execute('SELECT user_id, name FROM users ORDER BY name').fetchall()
-    all_tags = conn.execute('SELECT tag_id, tag_name FROM dietary_tags ORDER BY tag_name').fetchall()
+    tags = conn.execute('SELECT tag_id, tag_name FROM dietary_tags ORDER BY tag_name').fetchall()
     conn.close()
-
-    return render_template('add_recipe.html', users=users, all_tags=all_tags)
-
+    
+    return render_template('add_recipe.html', users=users, tags=tags)
 
 @app.route('/add_review/<int:recipe_id>', methods=['POST'])
 def add_review(recipe_id):
     """Add a review for a recipe"""
-    user_id = request.form.get('user_id', type=int)
     rating = request.form.get('rating', type=int)
     comment = request.form.get('comment', '')
+    user_id = request.form.get('user_id', type=int)  # may be None if "Anonymous"
     
-    if not user_id:
-        flash('Please select your name.', 'error')
-        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
-
     if not rating or rating < 1 or rating > 5:
         flash('Please provide a valid rating (1-5)', 'error')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
     
     conn = get_db_connection()
-    conn.execute('''
+    cursor = conn.cursor()
+    cursor.execute('''
         INSERT INTO reviews (recipe_id, user_id, rating, comment)
         VALUES (?, ?, ?, ?)
     ''', (recipe_id, user_id, rating, comment))
@@ -269,7 +302,6 @@ def add_review(recipe_id):
     
     flash('Review added successfully!', 'success')
     return redirect(url_for('recipe_detail', recipe_id=recipe_id))
-
 
 # Error handlers
 @app.errorhandler(404)

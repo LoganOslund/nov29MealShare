@@ -193,7 +193,7 @@ def init_database():
     ]
     cursor.executemany("INSERT OR IGNORE INTO ingredients (name) VALUES (?)", sample_ingredients)
     
-    # Insert only your 9 specified recipes - completely fresh start
+    # Insert 9 sample recipes
     sample_recipes = [
         ('Margherita Pizza', 'Classic pizza with fresh mozzarella, basil, and San Marzano tomato sauce.', 35, 18.95, 1),
         ('Caesar Salad', 'Crisp romaine lettuce with parmesan, croutons, and classic Caesar dressing.', 10, 11.95, 1),
@@ -210,7 +210,7 @@ def init_database():
         sample_recipes
     )
     
-    # Add your exact image URLs to each recipe
+    # Add image URLs for each recipe
     recipe_images = [
         (1, 'https://ooni.com/cdn/shop/articles/20220211142347-margherita-9920_ba86be55-674e-4f35-8094-2067ab41a671.jpg?v=1737104576&width=400', 'Margherita Pizza'),
         (2, 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop&auto=format', 'Caesar Salad'),
@@ -225,43 +225,45 @@ def init_database():
     cursor.executemany("INSERT INTO images (recipe_id, file_path, alt_text) VALUES (?, ?, ?)", recipe_images)
     
     # Insert sample recipe-ingredient relationships
-    # Chicken Stir Fry (recipe_id: 1)
     recipe_ingredients_data = [
+        # Recipe 1
         (1, 1, '2 breasts'),
         (1, 2, '2 cups'),
         (1, 3, '1 cup'),
         (1, 4, '2 tbsp'),
         (1, 5, '3 cloves'),
         (1, 6, '3 tbsp'),
-        # Vegetarian Buddha Bowl (recipe_id: 2)
+        # Recipe 2
         (2, 2, '1 cup'),
         (2, 3, '1 cup'),
         (2, 8, '2 peppers'),
         (2, 15, '1 avocado'),
         (2, 4, '2 tbsp'),
-        # Spicy Tofu Tacos (recipe_id: 3)
+        # Recipe 3
         (3, 7, '1 block'),
         (3, 18, '8 tortillas'),
         (3, 20, '2 cups'),
         (3, 10, '2 tomatoes'),
         (3, 17, '1/4 cup'),
-        # Classic Pasta Primavera (recipe_id: 4)
+        # Recipe 4
         (4, 11, '1 lb'),
         (4, 3, '1 cup'),
         (4, 10, '2 tomatoes'),
         (4, 13, '2 cups'),
         (4, 12, '1/2 cup'),
-        # Beef Burrito Bowl (recipe_id: 5)
+        # Recipe 5
         (5, 19, '1 lb'),
         (5, 2, '2 cups'),
         (5, 14, '1 can'),
         (5, 20, '2 cups'),
         (5, 15, '1 avocado')
     ]
-    # Skip recipe ingredients for clean setup
-    pass
+    cursor.executemany(
+        "INSERT OR REPLACE INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)",
+        recipe_ingredients_data
+    )
     
-    # Insert sample recipe tags (updated for 9 recipes)
+    # Insert sample recipe tags (for 9 recipes)
     recipe_tags_data = [
         # Margherita Pizza (1)
         (1, 1), (1, 15),  # vegetarian, italian
@@ -300,7 +302,7 @@ def init_database():
         sample_reviews
     )
     
-    # Insert sample images with real food URLs
+    # Additional sample images (currently not used)
     sample_images = [
         (1, 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop', 'Delicious avocado toast with cherry tomatoes'),
         (2, 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop', 'Colorful vegetable fried rice'),
@@ -318,6 +320,7 @@ def init_database():
         (14, 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=400&h=300&fit=crop', 'Crispy sweet potato fries'),
         (15, 'https://images.unsplash.com/photo-1576402794548-c805923dd4e1?w=400&h=300&fit=crop', 'Spicy buffalo cauliflower')
     ]
+    # Left commented to avoid duplicate images, keep for future use
     # cursor.executemany(
     #     "INSERT OR IGNORE INTO images (recipe_id, file_path, alt_text) VALUES (?, ?, ?)",
     #     sample_images
