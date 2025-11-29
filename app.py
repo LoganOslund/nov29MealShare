@@ -193,42 +193,56 @@ def recipes():
 @app.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
     """Add new recipe"""
+
+    conn = get_db_connection()
+
     if request.method == 'POST':
         name = request.form['name']
         instructions = request.form['instructions']
         prep_time = request.form.get('prep_time', type=int)
         cost_estimate = request.form.get('cost_estimate', type=float)
         author_id = request.form.get('author_id', type=int) or 1
-        
+
+        # Get selected tag IDs (checkboxes)
+        tag_ids = request.form.getlist('tags')
+
         if not name or not instructions:
             flash('Name and instructions are required', 'error')
-            conn = get_db_connection()
             users = conn.execute('SELECT user_id, name FROM users ORDER BY name').fetchall()
+            all_tags = conn.execute('SELECT tag_id, tag_name FROM dietary_tags ORDER BY tag_name').fetchall()
             conn.close()
-            return render_template('add_recipe.html', users=users)
-        
-        conn = get_db_connection()
+            return render_template('add_recipe.html', users=users, all_tags=all_tags)
+
         cursor = conn.cursor()
-        
+
         # Insert recipe
         cursor.execute('''
             INSERT INTO recipes (name, instructions, prep_time_minutes, cost_estimate, author_id)
             VALUES (?, ?, ?, ?, ?)
         ''', (name, instructions, prep_time, cost_estimate, author_id))
-        
+
         recipe_id = cursor.lastrowid
+
+        # Insert tags
+        for tag_id in tag_ids:
+            cursor.execute(
+                'INSERT INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)',
+                (recipe_id, tag_id)
+            )
+
         conn.commit()
         conn.close()
-        
+
         flash('Recipe added successfully!', 'success')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
-    
-    # GET request - show form with users
-    conn = get_db_connection()
+
+    # GET request — Show form
     users = conn.execute('SELECT user_id, name FROM users ORDER BY name').fetchall()
+    all_tags = conn.execute('SELECT tag_id, tag_name FROM dietary_tags ORDER BY tag_name').fetchall()
     conn.close()
-    
-    return render_template('add_recipe.html', users=users)
+
+    return render_template('add_recipe.html', users=users, all_tags=all_tags)
+
 
 @app.route('/add_review/<int:recipe_id>', methods=['POST'])
 def add_review(recipe_id):
